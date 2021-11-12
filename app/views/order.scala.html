@@ -1,0 +1,15 @@
+@import paypay._
+@import helper._
+
+@(itemForm: Form[Item], postUrl: Call)(implicit request: MessagesRequestHeader)
+
+@form(action = postUrl) {
+@CSRF.formField
+@inputRadioGroup(
+itemForm("item"),
+Seq("ItemOne" -> "ItemOne", "ItemTwo" -> "ItemTwo")
+)
+<button>
+    check order detail
+</button>
+}

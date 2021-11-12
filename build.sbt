@@ -10,6 +10,10 @@ scalaVersion := "2.13.6"
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
 
+// https://mvnrepository.com/artifact/jp.ne.paypay/paypayopa
+libraryDependencies += "jp.ne.paypay" % "paypayopa" % "1.0.3"
+libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.0"
+
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.example.controllers._"
 

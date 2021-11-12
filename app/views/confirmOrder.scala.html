@@ -1,0 +1,23 @@
+@import paypay._
+@import helper._
+
+@(filledOrderForm: Form[Order], postUrl: Call)(implicit request: MessagesRequestHeader)
+
+<head>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("stylesheets/readonly.css")'>
+</head>
+
+
+@form(action = postUrl) {
+@CSRF.formField
+@inputText(field = filledOrderForm("item"), args = Symbol("readonly") -> "", Symbol("_showConstraints") ->
+false)
+@inputText(field = filledOrderForm("price"), args = Symbol("readonly") -> "", Symbol("_showConstraints") ->
+false)
+@inputText(field = filledOrderForm("merchantPaymentId"), args = Symbol("size") -> "50", Symbol("readonly") ->
+"",Symbol("_showConstraints") ->
+false)
+<button>
+    QRCode make
+</button>
+}

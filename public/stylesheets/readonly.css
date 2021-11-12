@@ -1,0 +1,6 @@
+input:read-only,
+textarea:read-only {
+    border: 0;
+    box-shadow: none;
+    /* background-color: white; */
+}

@@ -1,0 +1,13 @@
+@import paypay.Entity
+
+@(list: Map[String, Entity])
+
+
+@displayLink(link: String, entity: Entity) = {
+<div>
+    <a href="@routes.HomeController.orderStatus(link)">@link</a> @entity.toString
+</div>
+}
+
+@main("List") {
+@for((key, value) <- list) { @displayLink(key, value) } }
