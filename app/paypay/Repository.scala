@@ -22,9 +22,9 @@ case class Entity(status: StatusEnum, requestedAt: Long)
 class MemoryRepository extends PayPayRepository {
 
   private var paymentTable: DBCol = Map(
-    "f758f027-e0b3-41ac-9e5f-7971f647cd22" -> Entity(StatusEnum.CREATED, 1636605366L),
-    "0d9fb175-d705-4976-8297-6373e291b62c" -> Entity(StatusEnum.CREATED, 1636605371L),
-    "1e9177d2-3dc2-402c-8d11-a0902ad8d60f" -> Entity(StatusEnum.COMPLETED, 1636613901L)
+    // "f758f027-e0b3-41ac-9e5f-7971f647cd22" -> Entity(StatusEnum.CREATED, 1636605366L),
+    // "0d9fb175-d705-4976-8297-6373e291b62c" -> Entity(StatusEnum.CREATED, 1636605371L),
+    // "1e9177d2-3dc2-402c-8d11-a0902ad8d60f" -> Entity(StatusEnum.COMPLETED, 1636613901L)
   )
 
   override def insertPayment(qr: QRCodeDetails) = {
