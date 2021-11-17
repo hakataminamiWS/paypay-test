@@ -1,0 +1,21 @@
+@import paypay._
+@import helper._
+
+@(filledCancelOrderForm: Form[CancelOrder], postUrl: Call)(implicit request: MessagesRequestHeader)
+
+<head>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("stylesheets/readonly.css")'>
+</head>
+
+@form(action = postUrl) {
+@CSRF.formField
+@inputText(
+field = filledCancelOrderForm("merchantPaymentId"),
+args = Symbol("size") -> "50",
+Symbol("readonly") -> "",
+Symbol("_showConstraints") -> false
+)
+<button>
+    Cancel Payment
+</button>
+}

@@ -1,0 +1,38 @@
+@import paypay._
+@import helper._
+
+@(filledRefundOrderForm: Form[RefundOrder], postUrl: Call)(implicit request: MessagesRequestHeader)
+
+<head>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("stylesheets/readonly.css")'>
+</head>
+
+@form(action = postUrl) {
+@CSRF.formField
+@inputText(
+field = filledRefundOrderForm("merchantRefundId"),
+args = Symbol("size") -> "50",
+Symbol("readonly") ->"",
+Symbol("_showConstraints") -> false
+)
+@inputText(
+field = filledRefundOrderForm("paymentId"),
+args = Symbol("size") -> "25",
+Symbol("readonly") -> "",
+Symbol("_showConstraints") -> false
+)
+@inputText(
+field = filledRefundOrderForm("amount"),
+args = Symbol("readonly") -> "",
+Symbol("_showConstraints") -> false
+)
+@inputText(
+field = filledRefundOrderForm("toMerchantPaymentId"),
+args = Symbol("size") -> "50",
+Symbol("readonly") -> "",
+Symbol("_showConstraints") -> false
+)
+<button>
+    Refund Payment
+</button>
+}

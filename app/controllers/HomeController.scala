@@ -6,14 +6,18 @@ import play.api.data.Form
 import play.api.mvc._
 import scala.util.Failure
 import scala.util.Success
+import services.cancel.CancelService
+import services.item.ItemService
+import services.refund.RefundService
 
 /** This controller creates an `Action` to handle HTTP requests to the application's home page.
   */
 @Singleton
 class HomeController @Inject() (
     components: MessagesControllerComponents,
-    repo: PayPayRepository
+    paypayRepository: PayPayRepository
 ) extends MessagesAbstractController(components) {
+  implicit val repo = paypayRepository
 
   /** Create an Action to render an HTML page.
     *
@@ -37,13 +41,8 @@ class HomeController @Inject() (
     }
 
     val successFunction = { item: Item =>
-      def priceForItem(item: Item): Int = item match {
-        case ItemOne => 10
-        case ItemTwo => 20
-      }
-
       // for show the order contents in confirm page, set the order in session.
-      val order = Order(item, priceForItem(item))
+      val order = Order(item, ItemService.priceForItem(item))
       Redirect(routes.HomeController.confirmOrder)
         .withSession(
           request.session +
@@ -68,10 +67,7 @@ class HomeController @Inject() (
 
     optOrderInSession match {
       case None => BadRequest(views.html.index("Bad Request for confirm-order"))
-
       case Some(order) =>
-        // for validating that the post content (of hashCode) and session data is matched.
-        // because the post content is change-able, even if the form is read-only.
         Ok(views.html.confirmOrder(orderForm.fill(order), postUrl))
           .withSession(
             request.session
@@ -79,6 +75,8 @@ class HomeController @Inject() (
               - priceInSession
               - merchantPaymentIdInSession
           )
+          // for validating that the post content (of hashCode) and session data is matched.
+          // because the post content is change-able, even if the form is read-only.
           .withSession(
             request.session
               + (confirmOrderHash -> order.hashCode.toString)
@@ -87,59 +85,149 @@ class HomeController @Inject() (
   }
 
   def createQRCode = Action { implicit request =>
-    println(request.session.data)
-
     val errorFunction = { formWithError: Form[Order] =>
       BadRequest(views.html.index("Bad Request for create-qr"))
     }
 
     val successFunction = (order: Order) => {
-      val confirmedOrder =
-        request.session
-          .get(confirmOrderHash)
-          .map(hash => if (hash == order.hashCode.toString) Some(order) else None)
-          .flatten
-
-      confirmedOrder match {
-        case None =>
-          BadRequest(
-            views.html.index(s"the order.hashCode in order and confirm-order does not match.")
-          )
-        case Some(o) => {
-          PayPayApiClient.qrCodeFromOrder(o) match {
-            case Failure(exception) => BadRequest(views.html.index(s"exception occur ${exception}"))
-            case Success(qrCodeDetails) => {
-              repo.insertPayment(qrCodeDetails)
-              Redirect(qrCodeDetails.getData.getUrl())
-            }
-          }
+      PayPayApiClient.qrCodeFromOrder(order) match {
+        case Failure(exception) => BadRequest(views.html.index(s"exception occur ${exception}"))
+        case Success(qrCodeDetails) => {
+          repo.insertPayment(qrCodeDetails)
+          Redirect(qrCodeDetails.getData.getUrl)
         }
       }
     }
 
     val formValidationResult = orderForm.bindFromRequest()
-
     formValidationResult.fold(errorFunction, successFunction)
   }
 
   def orderStatus(merchantPaymentId: String) = Action { implicit request =>
-    val result = PayPayApiClient.fetchPaymentDetails(
-      merchantPaymentId
-    )
+    val result = PayPayApiClient.fetchPaymentDetails(merchantPaymentId)
 
     result match {
-      case Failure(exception) => Ok(exception.toString())
+      case Failure(exception) => BadRequest(views.html.index(s"exception occur ${exception}"))
       case Success(value) => {
         repo.updatePaymentStatus(value)
-        Ok(views.html.index(value.toString))
+        val cancelUrl =
+          if (CancelService.paymentIsCancellable(merchantPaymentId))
+            Some(routes.HomeController.cancelOrder(Some(merchantPaymentId)))
+          else None
+
+        val refundUrl =
+          if (RefundService.paymentIsCompleted(merchantPaymentId))
+            Some(routes.HomeController.refundOrder(Some(merchantPaymentId)))
+          else None
+
+        Ok(views.html.orderStatus(value.toString, refundUrl, cancelUrl))
       }
     }
   }
 
   def orderList = Action { implicit request =>
-    Ok(views.html.orderList(repo.findAllPayment))
+    val allPayment = repo.findAllPayment.getOrElse(Map.empty)
+    Ok(views.html.orderList(allPayment))
   }
 
-  def refund = ???
+  def refundOrder(optId: Option[String]) = Action { implicit request =>
+    val refundOrder = for {
+      id <- optId
+      if RefundService.paymentIsRefundable(id)
+      pe  <- repo.findPayment(id)
+      pId <- pe.paymentId
+      amo = pe.amount
+    } yield RefundOrder(paymentId = pId, amount = amo, toMerchantPaymentId = id)
 
+    RefundService.calculateRefundAmount(refundOrder) match {
+      case None => BadRequest(views.html.index("the order cannot be refund"))
+      case Some(order) => {
+        val filledForm = refundOrderForm.fill(order)
+        val postUrl    = routes.HomeController.refundApi
+        Ok(views.html.refundOrder(filledForm, postUrl))
+          // for validating that the post content (of hashCode) and session data is matched.
+          .withSession(
+            request.session
+              + (confirmRefundOrderHash -> order.hashCode.toString)
+          )
+      }
+    }
+  }
+
+  def refundApi = Action { implicit request =>
+    val errorFunction = { formWithError: Form[RefundOrder] =>
+      BadRequest(views.html.index("Bad Request for refund"))
+    }
+
+    val successFunction = (refundOrder: RefundOrder) => {
+      PayPayApiClient.refundForOrder(refundOrder) match {
+        case Failure(exception) => BadRequest(views.html.index(s"exception occur ${exception}"))
+        case Success(refundDetails) => {
+          repo.insertRefund(refundDetails)
+          Redirect(routes.HomeController.refundStatus(refundDetails.getData.getMerchantRefundId))
+        }
+      }
+    }
+
+    val formValidationResult = refundOrderForm.bindFromRequest()
+    formValidationResult.fold(errorFunction, successFunction)
+  }
+
+  def refundStatus(merchantRefundId: String) = Action { implicit request =>
+    val result = PayPayApiClient.fetchRefundDetails(merchantRefundId)
+
+    result match {
+      case Failure(exception) => BadRequest(views.html.index(s"exception occur ${exception}"))
+      case Success(value) => {
+        repo.updateRefundStatus(value)
+        Ok(views.html.refundStatus(value.toString))
+      }
+    }
+  }
+
+  def refundList = Action { implicit request =>
+    val allRefund = repo.findAllRefund.getOrElse(Map.empty)
+    Ok(views.html.refundList(allRefund))
+  }
+
+  def cancelOrder(optId: Option[String]) = Action { implicit request =>
+    val cancelOrder = for {
+      id <- optId
+      if CancelService.paymentIsCancellable(id)
+    } yield CancelOrder(merchantPaymentId = id)
+
+    cancelOrder match {
+      case None => BadRequest(views.html.index("the order cannot be canceled"))
+      case Some(order) => {
+        val filledForm = cancelOrderForm.fill(order)
+        val postUrl    = routes.HomeController.cancelApi
+        Ok(views.html.cancelOrder(filledForm, postUrl))
+          // for validating that the post content (of hashCode) and session data is matched.
+          .withSession(
+            request.session
+              + (confirmCancelOrderHash -> order.hashCode.toString)
+          )
+      }
+    }
+  }
+
+  def cancelApi = Action { implicit request =>
+    val errorFunction = { formWithError: Form[CancelOrder] =>
+      BadRequest(views.html.index("Bad Request for cancel"))
+    }
+
+    val successFunction = (cancelOrder: CancelOrder) => {
+      PayPayApiClient.cancelForOrder(cancelOrder) match {
+        case Failure(exception) => BadRequest(views.html.index(s"exception occur ${exception}"))
+        case Success(notDataResponse) => {
+          Redirect(
+            routes.HomeController.orderStatus(cancelOrder.merchantPaymentId)
+          )
+        }
+      }
+    }
+
+    val formValidationResult = cancelOrderForm.bindFromRequest()
+    formValidationResult.fold(errorFunction, successFunction)
+  }
 }

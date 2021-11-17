@@ -1,11 +1,11 @@
-@import paypay.Entity
+@import paypay.PaymentEntity
 
-@(list: Map[String, Entity])
+@(list: Map[String, PaymentEntity])
 
 
-@displayLink(link: String, entity: Entity) = {
+@displayLink(link: String, paymentEntity: PaymentEntity) = {
 <div>
-    <a href="@routes.HomeController.orderStatus(link)">@link</a> @entity.toString
+    <a href="@routes.HomeController.orderStatus(link)">@link</a> @paymentEntity.toString
 </div>
 }
 

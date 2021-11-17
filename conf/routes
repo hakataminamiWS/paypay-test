@@ -7,18 +7,26 @@
 GET       /                                          controllers.HomeController.index()
 
 
-# paypay webPayment
+# paypay webPayment Purchase
 GET       /order                                     controllers.HomeController.order
 POST      /order                                     controllers.HomeController.checkOrder
-
 GET       /confirm-order                             controllers.HomeController.confirmOrder
-
 POST      /create-qr                                 controllers.HomeController.createQRCode
-
+# paypay webPayment check Payment Status
 GET       /order-status/:merchantPaymentId           controllers.HomeController.orderStatus(merchantPaymentId: String)
 GET       /order-list                                controllers.HomeController.orderList
 
-# POST      /refund/:merchantPaymentId                 controllers.HomeController.refund(merchantPaymentId: String)
+# paypay webPayment Refund
+GET       /refund-order                              controllers.HomeController.refundOrder(id: Option[String])
+POST      /refund                                    controllers.HomeController.refundApi
+# paypay webPayment check Refund Status
+GET       /refund-status/:merchantRefundId           controllers.HomeController.refundStatus(merchantRefundId: String)
+GET       /refund-list                               controllers.HomeController.refundList
+
+# paypay webPayment Cancel
+GET       /cancel-order                              controllers.HomeController.cancelOrder(id: Option[String])
+POST      /cancel                                    controllers.HomeController.cancelApi
+
 
 # Map static resources from the public folder to the assets URL path
 GET       /assets/*file                              controllers.Assets.versioned(path="/public", file: Asset)

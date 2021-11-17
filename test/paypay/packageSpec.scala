@@ -1,6 +1,9 @@
 package paypay
 
 import org.scalatestplus.play.PlaySpec
+import play.api.test.FakeHeaders
+import play.api.test.FakeRequest
+import controllers.routes
 
 class packageSpec extends PlaySpec {
   "parseItem" should {
@@ -43,20 +46,31 @@ class packageSpec extends PlaySpec {
 
   "orderFrom" should {
     "binds to Order." in {
+      val expectedOrder = Order(ItemOne, 10, "test")
+      implicit val t = FakeRequest(routes.HomeController.index())
+        .withSession(confirmOrderHash -> expectedOrder.hashCode.toString)
       val form =
         orderForm.bind(Map("item" -> "ItemOne", "price" -> "10", "merchantPaymentId" -> "test"))
-      form.get mustBe (Order(ItemOne, 10, "test"))
+      form.get mustBe expectedOrder
     }
-
   }
 
-  "test" should {
-    val order1 = Order(ItemOne, 10)
-    val order2 = Order(ItemOne, 10)
-    val order3 = Order(ItemOne, 10)
-
-    println(order1.merchantPaymentId)
-    println(order2.merchantPaymentId)
-    println(order3.merchantPaymentId)
+  "refundOrderFrom" should {
+    "binds to RefundOrder." in {
+      val expectedRefundOrder = RefundOrder("refundId", "paymentId", 100, "merchantPaymentId")
+      implicit val t = FakeRequest(routes.HomeController.index())
+        .withSession(confirmRefundOrderHash -> expectedRefundOrder.hashCode.toString)
+      val form =
+        refundOrderForm.bind(
+          Map(
+            "merchantRefundId"    -> "refundId",
+            "paymentId"           -> "paymentId",
+            "amount"              -> "100",
+            "toMerchantPaymentId" -> "merchantPaymentId"
+          )
+        )
+      form.get mustBe expectedRefundOrder
+    }
   }
+
 }

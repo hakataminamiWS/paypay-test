@@ -1,0 +1,19 @@
+@(order: String, refundUrl: Option[Call], cancelUrl: Option[Call])
+
+@main("Order Status") {
+<div style="white-space: pre">
+    @order
+</div>
+
+@cancelUrl.map { url =>
+<div>
+    <a href='@url'>cancel order</a>
+</div>
+}
+
+@refundUrl.map { url =>
+<div>
+    <a href='@url'>refund order</a>
+</div>
+}
+}

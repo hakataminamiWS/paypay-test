@@ -5,13 +5,15 @@ import jp.ne.paypay.api.PaymentApi
 import jp.ne.paypay.ApiClient
 import jp.ne.paypay.Configuration
 import jp.ne.paypay.model.MoneyAmount
+import jp.ne.paypay.model.NotDataResponse
 import jp.ne.paypay.model.PaymentDetails
 import jp.ne.paypay.model.QRCode
 import jp.ne.paypay.model.QRCodeDetails
-import play.api.Logging
+import jp.ne.paypay.model.Refund
+import jp.ne.paypay.model.RefundDetails
 import scala.util.Try
 
-object PayPayApiClient extends Logging {
+object PayPayApiClient {
 
   val apiClient: ApiClient = new Configuration().getDefaultApiClient
 
@@ -40,14 +42,36 @@ object PayPayApiClient extends Logging {
     qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
 
     val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
-    Try { paymentApi.createQRCode(qrCode) }
+    Try(paymentApi.createQRCode(qrCode))
   }
 
   def fetchPaymentDetails(
       merchantPaymentId: String
-  ): Try[PaymentDetails] = Try {
+  ): Try[PaymentDetails] = {
     val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
-    paymentApi.getCodesPaymentDetails(merchantPaymentId)
+    Try(paymentApi.getCodesPaymentDetails(merchantPaymentId))
+  }
+
+  def refundForOrder(order: RefundOrder): Try[RefundDetails] = {
+    val refund = new Refund
+    refund.setAmount(new MoneyAmount().amount(order.amount).currency(MoneyAmount.CurrencyEnum.JPY))
+    refund.setMerchantRefundId(order.merchantRefundId)
+    refund.setPaymentId(order.paymentId)
+
+    val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
+    Try(paymentApi.refundPayment(refund))
+  }
+
+  def cancelForOrder(order: CancelOrder): Try[NotDataResponse] = {
+    val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
+    Try(paymentApi.cancelPayment(order.merchantPaymentId))
+  }
+
+  def fetchRefundDetails(
+      merchantRefundId: String
+  ): Try[RefundDetails] = {
+    val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
+    Try(paymentApi.getRefundDetails(merchantRefundId))
   }
 
 }
