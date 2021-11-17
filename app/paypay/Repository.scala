@@ -41,33 +41,33 @@ case class RefundEntity(
 class MemoryRepository extends PayPayRepository {
 
   private var paymentTable: PaymentTable = Map(
-    "1c83f93d-ff4b-4e2f-bc40-45e7d32c195b" -> PaymentEntity(
-      PaymentState.StatusEnum.CREATED,
-      1637038435L,
-      Some("03761470811072651264"),
-      10
-    ),
-    "856e81e3-84ce-4835-8c83-0f3599cd841a" -> PaymentEntity(
-      PaymentState.StatusEnum.COMPLETED,
-      1636960956L,
-      Some("03760805271530397696"),
-      20
-    ),
-    "103c6992-abab-42d2-9440-c1a23efadbae" -> PaymentEntity(
-      PaymentState.StatusEnum.REFUNDED,
-      1636691631L,
-      Some("03758491787396349952"),
-      20
-    )
+    // "1c83f93d-ff4b-4e2f-bc40-45e7d32c195b" -> PaymentEntity(
+    //   PaymentState.StatusEnum.CREATED,
+    //   1637038435L,
+    //   Some("03761470811072651264"),
+    //   10
+    // ),
+    // "856e81e3-84ce-4835-8c83-0f3599cd841a" -> PaymentEntity(
+    //   PaymentState.StatusEnum.COMPLETED,
+    //   1636960956L,
+    //   Some("03760805271530397696"),
+    //   20
+    // ),
+    // "103c6992-abab-42d2-9440-c1a23efadbae" -> PaymentEntity(
+    //   PaymentState.StatusEnum.REFUNDED,
+    //   1636691631L,
+    //   Some("03758491787396349952"),
+    //   20
+    // )
   )
 
   private var refundTable: RefundTable = Map(
-    "e699a362-a434-47e7-aec9-aa82848f3b1a" -> RefundEntity(
-      RefundState.StatusEnum.REFUNDED,
-      1636943286L,
-      "03758491787396349952",
-      20
-    )
+    // "e699a362-a434-47e7-aec9-aa82848f3b1a" -> RefundEntity(
+    //   RefundState.StatusEnum.REFUNDED,
+    //   1636943286L,
+    //   "03758491787396349952",
+    //   20
+    // )
   )
 
   override def insertPayment(qr: QRCodeDetails) = {
