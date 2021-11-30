@@ -9,9 +9,9 @@
 * [Fetch refund status and details](https://developer.paypay.ne.jp/products/docs/webpayment#fetch-refund-payment)
 * [突合ファイル通知Webhook](https://developer.paypay.ne.jp/products/docs/webpayment#recon-file) -> [paypay-webhook-test](https://github.com/hakataminamiWS/paypay-webhook-test/tree/ae95d81b808e4ebd866ce0beb126f5db3808551c)
 * [決済トランザクション通知Webhook](https://www.paypay.ne.jp/opa/doc/jp/v1.0/webcashier#tag/%E3%83%88%E3%83%A9%E3%83%B3%E3%82%B6%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88) -> [paypay-webhook-test](https://github.com/hakataminamiWS/paypay-webhook-test/tree/ae95d81b808e4ebd866ce0beb126f5db3808551c)
+* [Polling of Get Payment/Refund Details](https://developer.paypay.ne.jp/products/docs/webpayment#fetch-qr-code) -> [polling-test](https://github.com/hakataminamiWS/polling-test/tree/0c50138a3a84c4d314963f691e9b0c382c157450)
 
 # Not yet
-* [Polling of Get Payment/Refund Details](https://developer.paypay.ne.jp/products/docs/webpayment#fetch-qr-code)
 * [Delete a QR Code](https://developer.paypay.ne.jp/products/docs/webpayment#delete-qr-codeid)
 * [Capture a payment authorization](https://developer.paypay.ne.jp/products/docs/webpayment#capture-payment)
 * [Revert a payment authorization](https://developer.paypay.ne.jp/products/docs/webpayment#revert-payment)
