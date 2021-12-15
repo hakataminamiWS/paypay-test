@@ -31,8 +31,8 @@ object PayPayApiClient {
   private val apiAssumeMerchant = config.getString("paypay.secret.apiAssumeMerchant")
   apiClient.setAssumeMerchant(apiAssumeMerchant)
 
-  def qrCodeFromOrder(order: Order): Try[QRCodeDetails] = {
-    val qrCode = new QRCode()
+  def qrCodeFromOrder(order: Order)(agent: String): Try[QRCodeDetails] = {
+    val qrCode = new jp.ne.paypay.model.QRCode()
     qrCode.setMerchantPaymentId(order.merchantPaymentId)
     qrCode.setAmount(new MoneyAmount().amount(order.price).currency(MoneyAmount.CurrencyEnum.JPY))
     qrCode.setCodeType("ORDER_QR")
@@ -40,15 +40,19 @@ object PayPayApiClient {
     val redirectUrl = config.getString("paypay.redirectUrl")
     qrCode.setRedirectUrl(redirectUrl + order.merchantPaymentId)
     qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
-
-    val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
+    // qrCode.setRedirectType(jp.ne.paypay.model.QRCode.RedirectTypeEnum.WEB_LINK)
+    // user agent test
+    // qrCode.setUserAgent(agent)
+    //
+    val paymentApi = new PaymentApi(apiClient)
+    println(qrCode)
     Try(paymentApi.createQRCode(qrCode))
   }
 
   def fetchPaymentDetails(
       merchantPaymentId: String
   ): Try[PaymentDetails] = {
-    val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
+    val paymentApi = new PaymentApi(apiClient)
     Try(paymentApi.getCodesPaymentDetails(merchantPaymentId))
   }
 
@@ -58,12 +62,12 @@ object PayPayApiClient {
     refund.setMerchantRefundId(order.merchantRefundId)
     refund.setPaymentId(order.paymentId)
 
-    val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
+    val paymentApi = new PaymentApi(apiClient)
     Try(paymentApi.refundPayment(refund))
   }
 
   def cancelForOrder(order: CancelOrder): Try[NotDataResponse] = {
-    val paymentApi = new PaymentApi(PayPayApiClient.apiClient)
+    val paymentApi = new PaymentApi(apiClient)
     Try(paymentApi.cancelPayment(order.merchantPaymentId))
   }
 

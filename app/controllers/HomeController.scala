@@ -89,11 +89,18 @@ class HomeController @Inject() (
       BadRequest(views.html.index("Bad Request for create-qr"))
     }
 
+    // user agent test
+    import play.api.http.HeaderNames
+    val agent: String = request.headers.get(HeaderNames.USER_AGENT).getOrElse("unknown")
+    //
     val successFunction = (order: Order) => {
-      PayPayApiClient.qrCodeFromOrder(order) match {
+      PayPayApiClient.qrCodeFromOrder(order)(agent) match {
         case Failure(exception) => BadRequest(views.html.index(s"exception occur ${exception}"))
         case Success(qrCodeDetails) => {
           repo.insertPayment(qrCodeDetails)
+          println(qrCodeDetails.getData.getUrl)
+          println(agent)
+          println(qrCodeDetails.getData().getRedirectUrl())
           Redirect(qrCodeDetails.getData.getUrl)
         }
       }
