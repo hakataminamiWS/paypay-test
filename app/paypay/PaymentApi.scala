@@ -7,7 +7,7 @@ import jp.ne.paypay.Configuration
 import jp.ne.paypay.model.MoneyAmount
 import jp.ne.paypay.model.NotDataResponse
 import jp.ne.paypay.model.PaymentDetails
-import jp.ne.paypay.model.QRCode
+// import jp.ne.paypay.model.QRCode
 import jp.ne.paypay.model.QRCodeDetails
 import jp.ne.paypay.model.Refund
 import jp.ne.paypay.model.RefundDetails
@@ -32,17 +32,17 @@ object PayPayApiClient {
   apiClient.setAssumeMerchant(apiAssumeMerchant)
 
   def qrCodeFromOrder(order: Order)(agent: String): Try[QRCodeDetails] = {
-    val qrCode = new jp.ne.paypay.model.QRCode()
+    val qrCode = new QRCode()
     qrCode.setMerchantPaymentId(order.merchantPaymentId)
     qrCode.setAmount(new MoneyAmount().amount(order.price).currency(MoneyAmount.CurrencyEnum.JPY))
     qrCode.setCodeType("ORDER_QR")
 
     val redirectUrl = config.getString("paypay.redirectUrl")
     qrCode.setRedirectUrl(redirectUrl + order.merchantPaymentId)
-    qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
-    // qrCode.setRedirectType(jp.ne.paypay.model.QRCode.RedirectTypeEnum.WEB_LINK)
+    // qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
+    qrCode.setRedirectType(jp.ne.paypay.model.QRCode.RedirectTypeEnum.WEB_LINK)
     // user agent test
-    // qrCode.setUserAgent(agent)
+    qrCode.setUserAgent(agent)
     //
     val paymentApi = new PaymentApi(apiClient)
     println(qrCode)
