@@ -1,7 +1,7 @@
 @import paypay._
 @import helper._
 
-@(filledOrderForm: Form[Order], postUrl: Call)(implicit request: MessagesRequestHeader)
+@(filledOrderForm: Form[Order], postUrl: Call, redirectUrl: String)(implicit request: MessagesRequestHeader)
 
 <head>
     <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("stylesheets/readonly.css")'>
@@ -17,7 +17,12 @@ false)
 @inputText(field = filledOrderForm("merchantPaymentId"), args = Symbol("size") -> "50", Symbol("readonly") ->
 "",Symbol("_showConstraints") ->
 false)
-<button formtarget="_blank">
+<button id='qrCodeMake' formtarget="_blank">
     QRCode make
 </button>
 }
+
+<script type="text/javascript">
+    const redirectURL = '@redirectUrl';
+</script>
+<script src='@routes.Assets.versioned("javascripts/redirectAfterFormPost.js")' type="text/javascript"></script>

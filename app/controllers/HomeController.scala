@@ -9,6 +9,7 @@ import scala.util.Success
 import services.cancel.CancelService
 import services.item.ItemService
 import services.refund.RefundService
+import com.typesafe.config.ConfigFactory
 
 /** This controller creates an `Action` to handle HTTP requests to the application's home page.
   */
@@ -67,8 +68,10 @@ class HomeController @Inject() (
 
     optOrderInSession match {
       case None => BadRequest(views.html.index("Bad Request for confirm-order"))
-      case Some(order) =>
-        Ok(views.html.confirmOrder(orderForm.fill(order), postUrl))
+      case Some(order) => {
+        val config      = ConfigFactory.load()
+        val redirectUrl = config.getString("paypay.redirectUrl") + order.merchantPaymentId
+        Ok(views.html.confirmOrder(orderForm.fill(order), postUrl, redirectUrl))
           .withSession(
             request.session
               - itemInSession
@@ -81,6 +84,7 @@ class HomeController @Inject() (
             request.session
               + (confirmOrderHash -> order.hashCode.toString)
           )
+      }
     }
   }
 
