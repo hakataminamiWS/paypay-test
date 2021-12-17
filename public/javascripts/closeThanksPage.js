@@ -1,5 +1,5 @@
 function autoClose() {
-    setTimeout(function () { this.window.close() }, 5000);
+    setTimeout(window.close, 5000);
 }
 
 window.addEventListener("load", autoClose, {
