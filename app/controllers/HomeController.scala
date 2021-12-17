@@ -94,10 +94,12 @@ class HomeController @Inject() (
     }
 
     val successFunction = (order: Order) => {
-      // port test
+      // user agent test
       // PayPayApiClient.qrCodeFromOrder(order) match {
-      val port = Some(443)
-      PayPayApiClient.qrCodeFromOrder(order)(port) match {
+      import play.api.http.HeaderNames
+      val agent: String = request.headers.get(HeaderNames.USER_AGENT).getOrElse("unknown")
+      //
+      PayPayApiClient.qrCodeFromOrder(order)(agent) match {
         //
         case Failure(exception) => BadRequest(views.html.index(s"exception occur ${exception}"))
         case Success(qrCodeDetails) => {

@@ -44,18 +44,19 @@ object PayPayApiClient {
   //   Try(paymentApi.createQRCode(qrCode))
   // }
 
-  def qrCodeFromOrder(order: Order)(port: Option[Int]): Try[QRCodeDetails] = {
-    val qrCode = new QRCode()
+  def qrCodeFromOrder(order: Order)(agent: String): Try[QRCodeDetails] = {
+    val qrCode = new ModQRCode()
     qrCode.setMerchantPaymentId(order.merchantPaymentId)
     qrCode.setAmount(new MoneyAmount().amount(order.price).currency(MoneyAmount.CurrencyEnum.JPY))
     qrCode.setCodeType("ORDER_QR")
-
+    val port: Option[Int] = Some(443)
     val redirectUrl = port match {
-      case Some(int) => "https://gentle-cliffs-10660.herokuapp.com:" + int + "/order-status/"
+      case Some(int) => "https://example.com:" + int
       case None      => config.getString("paypay.redirectUrl")
     }
     qrCode.setRedirectUrl(redirectUrl + order.merchantPaymentId)
     qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
+    qrCode.setUserAgent(agent)
     val paymentApi = new PaymentApi(apiClient)
     Try(paymentApi.createQRCode(qrCode))
   }
