@@ -7,7 +7,7 @@ import jp.ne.paypay.Configuration
 import jp.ne.paypay.model.MoneyAmount
 import jp.ne.paypay.model.NotDataResponse
 import jp.ne.paypay.model.PaymentDetails
-// import jp.ne.paypay.model.QRCode
+import jp.ne.paypay.model.QRCode
 import jp.ne.paypay.model.QRCodeDetails
 import jp.ne.paypay.model.Refund
 import jp.ne.paypay.model.RefundDetails
@@ -31,21 +31,32 @@ object PayPayApiClient {
   private val apiAssumeMerchant = config.getString("paypay.secret.apiAssumeMerchant")
   apiClient.setAssumeMerchant(apiAssumeMerchant)
 
-  def qrCodeFromOrder(order: Order)(agent: String): Try[QRCodeDetails] = {
+  // def qrCodeFromOrder(order: Order): Try[QRCodeDetails] = {
+  //   val qrCode = new QRCode()
+  //   qrCode.setMerchantPaymentId(order.merchantPaymentId)
+  //   qrCode.setAmount(new MoneyAmount().amount(order.price).currency(MoneyAmount.CurrencyEnum.JPY))
+  //   qrCode.setCodeType("ORDER_QR")
+
+  //   val redirectUrl = config.getString("paypay.redirectUrl")
+  //   qrCode.setRedirectUrl(redirectUrl + order.merchantPaymentId)
+  //   qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
+  //   val paymentApi = new PaymentApi(apiClient)
+  //   Try(paymentApi.createQRCode(qrCode))
+  // }
+
+  def qrCodeFromOrder(order: Order)(port: Option[Int]): Try[QRCodeDetails] = {
     val qrCode = new QRCode()
     qrCode.setMerchantPaymentId(order.merchantPaymentId)
     qrCode.setAmount(new MoneyAmount().amount(order.price).currency(MoneyAmount.CurrencyEnum.JPY))
     qrCode.setCodeType("ORDER_QR")
 
-    val redirectUrl = config.getString("paypay.redirectUrl")
+    val redirectUrl = port match {
+      case Some(int) => "http://gentle-cliffs-10660.herokuapp.com" + int + "/order-list"
+      case None      => config.getString("paypay.redirectUrl")
+    }
     qrCode.setRedirectUrl(redirectUrl + order.merchantPaymentId)
-    // qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
-    qrCode.setRedirectType(jp.ne.paypay.model.QRCode.RedirectTypeEnum.WEB_LINK)
-    // user agent test
-    qrCode.setUserAgent(agent)
-    //
+    qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
     val paymentApi = new PaymentApi(apiClient)
-    println(qrCode)
     Try(paymentApi.createQRCode(qrCode))
   }
 

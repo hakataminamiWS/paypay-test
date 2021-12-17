@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 /** QRCode
   */
 
-class QRCode extends OyaQRCode {
+class ModQRCode extends OyaQRCode {
 
   @SerializedName("userAgent")
   var userAgent: String = "unknown";
