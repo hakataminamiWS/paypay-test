@@ -49,11 +49,8 @@ object PayPayApiClient {
     qrCode.setMerchantPaymentId(order.merchantPaymentId)
     qrCode.setAmount(new MoneyAmount().amount(order.price).currency(MoneyAmount.CurrencyEnum.JPY))
     qrCode.setCodeType("ORDER_QR")
-    val port: Option[Int] = Some(443)
-    val redirectUrl = port match {
-      case Some(int) => "https://example.com:" + int
-      case None      => config.getString("paypay.redirectUrl")
-    }
+    // test
+    val redirectUrl = "https://gentle-cliffs-10660.herokuapp.com:443/order-status/"
     qrCode.setRedirectUrl(redirectUrl + order.merchantPaymentId)
     qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
     qrCode.setUserAgent(agent)
