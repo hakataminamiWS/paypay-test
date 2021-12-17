@@ -7,7 +7,7 @@ import jp.ne.paypay.Configuration
 import jp.ne.paypay.model.MoneyAmount
 import jp.ne.paypay.model.NotDataResponse
 import jp.ne.paypay.model.PaymentDetails
-import jp.ne.paypay.model.QRCode
+// import jp.ne.paypay.model.QRCode
 import jp.ne.paypay.model.QRCodeDetails
 import jp.ne.paypay.model.Refund
 import jp.ne.paypay.model.RefundDetails
@@ -49,10 +49,10 @@ object PayPayApiClient {
     qrCode.setMerchantPaymentId(order.merchantPaymentId)
     qrCode.setAmount(new MoneyAmount().amount(order.price).currency(MoneyAmount.CurrencyEnum.JPY))
     qrCode.setCodeType("ORDER_QR")
-    // test
-    val redirectUrl = "https://gentle-cliffs-10660.herokuapp.com:443/order-status/"
-    qrCode.setRedirectUrl(redirectUrl + order.merchantPaymentId)
-    qrCode.setRedirectType(QRCode.RedirectTypeEnum.WEB_LINK)
+
+    val redirectToThx = config.getString("paypay.thanksPage")
+    qrCode.setRedirectUrl(redirectToThx)
+    qrCode.setRedirectType(jp.ne.paypay.model.QRCode.RedirectTypeEnum.WEB_LINK)
     qrCode.setUserAgent(agent)
     val paymentApi = new PaymentApi(apiClient)
     Try(paymentApi.createQRCode(qrCode))

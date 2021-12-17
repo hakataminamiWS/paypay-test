@@ -9,13 +9,14 @@ import scala.util.Success
 import services.cancel.CancelService
 import services.item.ItemService
 import services.refund.RefundService
-import com.typesafe.config.ConfigFactory
+import play.api.Configuration
 
 /** This controller creates an `Action` to handle HTTP requests to the application's home page.
   */
 @Singleton
 class HomeController @Inject() (
     components: MessagesControllerComponents,
+    config: Configuration,
     paypayRepository: PayPayRepository
 ) extends MessagesAbstractController(components) {
   implicit val repo = paypayRepository
@@ -69,9 +70,8 @@ class HomeController @Inject() (
     optOrderInSession match {
       case None => BadRequest(views.html.index("Bad Request for confirm-order"))
       case Some(order) => {
-        val config      = ConfigFactory.load()
-        val redirectUrl = config.getString("paypay.redirectUrl") + order.merchantPaymentId
-        Ok(views.html.confirmOrder(orderForm.fill(order), postUrl, redirectUrl))
+        val redirectUrlForOriginTab = config.get[String]("paypay.redirectUrlForOriginTab") + order.merchantPaymentId
+        Ok(views.html.confirmOrder(orderForm.fill(order), postUrl, redirectUrlForOriginTab))
           .withSession(
             request.session
               - itemInSession
@@ -111,6 +111,10 @@ class HomeController @Inject() (
 
     val formValidationResult = orderForm.bindFromRequest()
     formValidationResult.fold(errorFunction, successFunction)
+  }
+
+  def thanksPage = Action { implicit request =>
+    Ok(views.html.thanksPage())
   }
 
   def orderStatus(merchantPaymentId: String) = Action { implicit request =>
