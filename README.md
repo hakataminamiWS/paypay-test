@@ -1,5 +1,5 @@
 # paypay-test
-[the Web Payment](https://developer.paypay.ne.jp/products/docs/webpayment#demo-heading) test for paypay by PlayFramework 2.8.x and [paypayopa-sdk-java 1.0.3](https://github.com/paypay/paypayopa-sdk-java/tree/489cfeb919fc7369f645f3b1ae306f7357cf139d)
+[the Web Payment](https://developer.paypay.ne.jp/products/docs/webpayment#demo-heading) test for paypay by PlayFramework 2.8.x and [paypayopa-sdk-java 1.0.5](https://github.com/paypay/paypayopa-sdk-java/tree/1.0.5)
 
 # Function
 * [決済(Create a QR Code)](https://developer.paypay.ne.jp/products/docs/webpayment#dynamic-qr-codeid)
